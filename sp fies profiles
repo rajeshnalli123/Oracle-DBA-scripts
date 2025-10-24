@@ -1,0 +1,56 @@
+#####  open a new terminal and tail alert log file. #######
+cd /u01/app/oracle/diag/rdbms/proddb/proddb/trace/
+ls -lrt alert_proddb.log
+tail -f alert_proddb.log
+
+###################################
+
+
+check the parameter 
+show parameter parameter name;
+show parameter open_cursors;
+CREATE PFILE FROM SPFILE;
+
+ALTER SYSTEM SET OPEN_CURSORS=500 SCOPE=SPFILE; 
+shut immediate;
+startup;
+show parameter OPEN_CURSORS;
+
+ALTER SYSTEM SET OPEN_CURSORS=600 SCOPE=memory; 
+shut immediate;
+startup;
+show parameter OPEN_CURSORS;
+
+ALTER SYSTEM SET OPEN_CURSORS=800 SCOPE=both; 
+shut immediate;
+startup;
+show parameter OPEN_CURSORS;
+
+set lines 150;
+col name for a20
+col value for a60
+select name, value from v$parameter where name = 'control_files';
+
+CREATE SPFILE FROM PFILE='Location of the PFILE';
+
+check if parameter is modifiable:
+col name for a30;
+SELECT  name,issys_modifiable m_INSTANCE, isses_modifiable m_SESSION  FROM V$parameter WHERE name = 'shared_pool_size';
+
+
+---
+SELECT  name,
+case when issys_modifiable = 'FALSE' then 'STATIC_WRT_INSTANCE'
+when issys_modifiable =  'IMMEDIATE' then 'DYNAMIC_INSTANCE' end m_INSTANCE, 
+case when isses_modifiable = 'FALSE' then 'STATIC_WRT_SESSION'
+when isses_modifiable = 'TRUE' then 'DYNAMIC_WRT_SESSION' end  m_SESSION  FROM V$parameter order by 1;
+---
+
+NOTE: you cannot use scope = memory or scope = both for the static parameters(w.r.t instance).
+
+you should use scope = spfile 
+And that parameter,  to reflect you should restart/bounce instance.
+
+
+ create pfile='/u01/pfile_proddb.ora' from spfile;
+ startup  pfile='/u01/app/oracle/product/19.0.0.0/dbhome_1/dbs/initproddb.ora';
