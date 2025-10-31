@@ -1,0 +1,107 @@
+setting enviroment using oraenv
+
+[oracle@dbserver1 ~]$ which oraenv
+/usr/local/bin/oraenv
+[oracle@dbserver1 ~]$ cat /etc/oratab |grep proddb
+proddb:/u01/app/oracle/product/19.0.0.0/dbhome_1:N
+[oracle@dbserver1 ~]$ . oraenv
+ORACLE_SID = [oracle] ? proddb
+The Oracle base has been set to /u01/app/oracle
+[oracle@dbserver1 ~]$ 
+[oracle@dbserver1 ~]$ env |grep ORA
+ORACLE_SID=proddb
+ORACLE_BASE=/u01/app/oracle
+ORACLE_HOME=/u01/app/oracle/product/19.0.0.0/dbhome_1
+[oracle@dbserver1 ~]$ 
+
+
+#########################
+to check if ARCHIVE log is enabled.
+archive log list;
+
+from os LEVEL
+ps -ef |grep arc
+
+#ENABLE ARCHIVE LOG 
+
+shut immediate; ( shutdown gracefully)
+startup mount;
+alter database archivelog;
+alter database open;
+archive log list;
+
+alter system switch logfile;
+-- observe the logs in fra.
+
+#DISABLE ARCHIVE LOG 
+shut immediate;
+startup mount;
+alter database noarchivelog;
+alter database open;
+archive log list;
+
+know your archive log destination
+
+archive log list;
+
+value at Archive destination is the destination.
+It can be a mountpoint or asm diskgroup or it can be FRA (USE_DB_RECOVERY_FILE_DEST)
+
+if FRA is enable we will have that as USE_DB_RECOVERY_FILE_DEST.
+to find FRA location...
+show parameter DB_RECOVERY_FILE_DEST
+
+##change archive log path
+to separate your archive logs from FRA use log_archive_dest_1 parameter.
+
+show parameter log_archive_dest_1;
+
+mkdir -p /database/archivelogs
+
+alter system set log_archive_dest_1='LOCATION=/database/archivelogs' scope=both;
+
+#swicth back to FRA
+alter system set log_archive_dest_1='LOCATION=USE_DB_RECOVERY_FILE_DEST' scope=both;
+
+when ever you change archive dest you need to take controlfile backup.
+
+#to change the extension.
+alter system set log_archive_format = '%t_%s_%r.arc'  scope = spfile;
+shut immediate;
+startup;
+
+
+disable FRA:
+ALTER SYSTEM SET db_recovery_file_dest='' SCOPE=BOTH;
+ALTER SYSTEM SET db_recovery_file_dest_size=6000M scope=both;
+
+enable FRA:
+ALTER SYSTEM SET db_recovery_file_dest='/u01/app/oracle/fast_recovery_area' SCOPE=BOTH;
+
+
+alter system set log_archive_dest_1='' scope=both;
+alter system set log_archive_dest_1='LOCATION=USE_DB_RECOVERY_FILE_DEST' scope=both;
+
+set linesize 200 pagesize 1000
+select * from v$recovery_area_usage;
+SELECT * FROM V$RECOVERY_FILE_DEST;
+
+set linesize 500
+col NAME for a50
+select name,round(SPACE_LIMIT/1024/1024,2) "Allocated Space(MB)", 
+round(SPACE_USED/1024/1024,2) "Used Space(MB)",
+round(SPACE_RECLAIMABLE/1024/1024,2) "SPACE_RECLAIMABLE (MB)" ,
+(select round(ESTIMATED_FLASHBACK_SIZE/1024/1024,2) 
+from V$FLASHBACK_DATABASE_LOG) "Estimated Space (MB)"
+from V$RECOVERY_FILE_DEST;
+
+
+enable flashback.
+select FLASHBACK_ON from v$database;
+
+alter database flashback on;
+
+show parameter db_flashback_retention_target;
+
+db_flashback_retention_target represent the retention time of flash back logs.
+defualt is 1440 min which is 24hours or 1day.
