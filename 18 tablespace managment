@@ -211,7 +211,8 @@ ALTER DATABASE DEFAULT TEMPORARY TABLESPACE TEMP_NEW;
 
 select property_name,property_value from database_properties where property_name like '%DEFAULT%';
 
-ALTER TABLESPACE TEMP ADD TEMPFILE '+DATAC1' SIZE 10G AUTOEXTEND ON NEXT 1G MAXSIZE 32767M;
+ALTER TABLESPACE TEMP ADD TEMPFILE '/database/HDFCP/datafile/temp_002.dbf' SIZE 10G AUTOEXTEND ON NEXT 1G MAXSIZE 32767M;
+
 
 who are using old temporary tablespace ( i.e. TEMP ) and kill them.
 
