@@ -74,25 +74,27 @@ ORDER BY file_id;
 OMF(oaracle managed file) location:=
 
 show parameter DB_CREATE_FILE_DEST
+!mkdir -p /u01/tablespace
 alter system set DB_CREATE_FILE_DEST='/u01/tablespace' scope=both;
 
 
 DDL ON TABLESPACE:
 
 --Create TABLESPACE
-Create tablespace HRMS_TS datafile '/database/PRODDB/datafile/HRMS_001.dbf' size 5M autoextend on;
+Create tablespace HRMS_TS datafile '/database/HDFCP/datafile/HRMS_001.dbf' size 5M autoextend on;
 
-
-Create tablespace HDFC_TS datafile '/database/VAMDB/datafile/HDFC_001.dbf' size 5M ;
+Create tablespace HDFC_TS datafile '/database/HDFCP/datafile/HDFC_001.dbf' size 5M ;
 
 --ignore below till ASM is completed.
 create tablespace hrms_ts datafile '+DATA' size 20M;
 
 -- Add a datafile to a tablespace
-Alter tablespace HRMS_TS add datafile '/database/VAMDB/datafile/HRMS_002.dbf'  size 5M autoextend on;
+Alter tablespace HRMS_TS add datafile '/database/HDFCP/datafile/HRMS_002.dbf'  size 5M autoextend on;
 
 -- Resize a datafile
 alter database datafile '/database/VAMDB/datafile/HRMS_001.dbf' resize 20000000M;
+2000000M NOT ACCEPTABLE:
+alter database datafile '/database/HDFCP/datafile/HRMS_001.dbf' resize 100M;
 
 --ignore below till ASM is completed.
 alter database datafile '+DATA/ORADB/DATAFILE/users.279.1102165131' resize 150M;
@@ -203,7 +205,7 @@ ORDER BY file_name;
 
 CREATE TEMP TABLESPACE
 
-CREATE TEMPORARY TABLESPACE TEMP_NEW TEMPFILE '/database/PRODDB/datafile/temp__new_01.dbf' SIZE 10m autoextend on maxsize unlimited;
+CREATE TEMPORARY TABLESPACE TEMP_NEW TEMPFILE '/database/HDFCP/datafile/temp__new_01.dbf' SIZE 10m autoextend on maxsize unlimited;
 
 ALTER DATABASE DEFAULT TEMPORARY TABLESPACE TEMP_NEW;
 
