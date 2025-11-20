@@ -1,0 +1,12 @@
+
+
+export ORACLE_HOME=/u01/app/oracle//product/19.0.0.0/dbhome_1
+export ORACLE _SID=proddb
+
+export PATH=$PATH:$ORACLE_HOME/bin
+
+
+export ORACLE_HOME=/u01/app/oracle/product/19.0.0.0/dbhome_1
+export ORACLE_SID=testdb
+
+export PATH=$PATH:$ORACLE_HOME/bin
