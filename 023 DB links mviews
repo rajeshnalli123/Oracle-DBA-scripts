@@ -1,0 +1,155 @@
+
+
+proddb#
+
+create user hdfc_user1 identified by hdfc_user1;
+grant connect , resource to hdfc_user1;
+
+
+icicip#
+create user icici_user2 identified by icici_user2;
+grant connect , resource to icici_user2;
+
+
+
+create table accounts_hd (acc_no number , acc_name varchar2(10)); 
+
+
+
+servername		server1				server2
+IP				192.168.29.100		192.168.29.200
+instance name	proddb				testdb
+username		icici_user			hdfc_user
+listener name	listener_proddb		listener_testdb
+
+
+#PRODDB as sys
+create user hdfc_user1 identified by hdfc_user1;
+grant connect , resource to hdfc_user1;
+
+alter user hdfc_user1 quota unlimited on users;
+
+grant create database link to hdfc_user1;
+
+grant create materialized view to hdfc_user1;
+grant execute on dbms_refresh to hdfc_user1;
+
+#PRODDB as HDFC_user
+
+create table user.accounts_i (acc_no number , acc_name varchar2(10));
+
+CREATE DATABASE LINK DBLINK_TO_ICICI
+CONNECT TO ICICI_USER2 IDENTIFIED BY icici_user2
+USING 'to_icicip';
+
+select * from accounts_ic@DBLINK_TO_ICICI
+
+EXEC DBMS_MVIEW.REFRESH('ACCOUNTS_I_MV', 'C'); -- 'C' for Complete refresh
+
+
+
+#TESTDB as sys
+create user icici_user2 identified by icici_user2;
+grant connect , resource to icici_user2;
+
+alter user icici_user2 quota unlimited on users;
+
+
+insert into accounts_ic select * from accounts_ic;
+
+select count(*) from accounts_ic@DBLINK_TO_ICICI;
+
+#TESTDB as icici_user
+ 
+create table accounts_ic (acc_number number , account_name varchar2(10));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+proddb# as sys user:
+
+create user india_user identified by india_user;
+grant connect , resource to india_user;
+
+alter user india_user quota unlimited on users;
+grant create database link to india_user;
+grant create materialized view to india_user;
+grant execute on dbms_refresh to india_user;
+
+
+
+
+proddb# as india user:
+server1 admin:  
+sqlplus hyder_user/hyder_user@to_icicip
+
+sqlplus india_user/india_user
+
+
+
+proddb# as india user:
+
+create table acc_india (acc_no number , acc_name varchar2(10));
+
+CREATE DATABASE LINK DBLINK_TO_HYDER
+CONNECT TO HYDER_USER IDENTIFIED BY hyder_user
+USING 'to_icicip';
+
+select * from acc_hyder@DBLINK_TO_HYDER;
+
+select count(*) from acc_hyder@DBLINK_TO_HYDER;
+
+create materialized view acc_hyder_mv as select * from acc_hyder@DBLINK_TO_HYDER;
+
+EXEC DBMS_MVIEW.REFRESH('ACC_HYDER_MV');
+EXEC DBMS_MVIEW.REFRESH('ACC_HYDER_MV',C);
+
+
+
+
+
+icicip# as sys user:
+
+create user hyder_user identified by hyder_user;
+grant connect , resource to hyder_user;
+
+alter user hyder_user quota unlimited on users;
+
+
+server2 admin:  
+
+sqlplus india_user/india_user@to_proddb
+
+
+sqlplus hyder_user/hyder_user
+
+icicip# as hyder user:
+
+create table acc_hyder (account_no number , account_name varchar2(10));
+
+insert into acc_hyder values (1,'kondapur');
+
+insert into acc_hyder select * from acc_hyder;
+
+insert into acc_hyder select * from acc_hyder;
+
+truncate table acc_hyder;
