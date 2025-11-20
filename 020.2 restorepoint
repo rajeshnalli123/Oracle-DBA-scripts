@@ -1,0 +1,79 @@
+
+
+set lines 200
+col NAME for a32
+col TIME for a32
+SELECT NAME, SCN, TIME, DATABASE_INCARNATION#,GUARANTEE_FLASHBACK_DATABASE,STORAGE_SIZE FROM V$RESTORE_POINT;
+
+step 1:
+create restore point CLEAN_DB ;
+set lines 200
+col NAME for a32
+col TIME for a32
+SELECT NAME, SCN, TIME, DATABASE_INCARNATION#,GUARANTEE_FLASHBACK_DATABASE,STORAGE_SIZE FROM V$RESTORE_POINT;
+drop restore point clean_db;
+
+set lines 200
+col NAME for a32
+col TIME for a32
+SELECT NAME, SCN, TIME, DATABASE_INCARNATION#,GUARANTEE_FLASHBACK_DATABASE,STORAGE_SIZE FROM V$RESTORE_POINT;
+
+create restore point clean_db_g guarantee flashback database;
+
+set lines 200
+col NAME for a32
+col TIME for a32
+SELECT NAME, SCN, TIME, DATABASE_INCARNATION#,GUARANTEE_FLASHBACK_DATABASE,STORAGE_SIZE FROM V$RESTORE_POINT;
+
+do few DMLS;
+truncated a table;
+create a test table;
+
+
+shut immediate;
+startup mount;
+flashback database to restore point clean_db_g;
+
+alter database open resetlogs;
+
+create table student
+(
+st_no    number(3)
+st_name  varchar2(10),
+st_dob   date,
+st_fee   number(7,2),
+st_gender  char(1)
+);
+
+CREATE TABLE Employees (
+    EmployeeID INT PRIMARY KEY,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) UNIQUE,
+    HireDate DATE,
+    Salary DECIMAL(10, 2)
+);
+
+
+create table student
+(
+st_no    number(3)
+st_name  varchar2(10),
+st_dob   date,
+st_fee   number(7,2),
+st_gender  char(1)
+);
+
+CREATE TABLE student
+ (
+   	emp_no number(3),
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) UNIQUE,
+    PhoneNumber VARCHAR(20),
+    HireDate DATE,
+    JobTitle VARCHAR(50),
+    Salary DECIMAL(10, 2),
+    DepartmentID INT,
+    FOREIGN KEY (DepartmentID) REFERENCES Department(DepartmentID)
+);
