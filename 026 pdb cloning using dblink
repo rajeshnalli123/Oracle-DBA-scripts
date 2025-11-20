@@ -1,0 +1,38 @@
+
+col name for a30
+select name,open_mode from v$pdbs;
+
+alter pluggable database all open;
+
+sqlplus / as sysdba
+col name for a30
+select name,open_mode from v$pdbs;
+alter session set container = sbi_new;
+
+create user clone_user identified by clone_user;
+grant connect,resource,create pluggable database to clone_user;
+
+exit
+
+
+sqlplus / as sysdba
+alter pluggable database sbi_new close;
+alter pluggable database sbi_new open read only;
+
+
+
+connect to targer server (cdb$root)
+and make sure source database tns is added in target tnsname.ora
+
+create database link sbi_new_dblink connect to clone_user identified by clone_user using 'to_sbi_new';
+select * from tab@sbi_new_dblink;
+
+
+
+create pluggable database sbi_new_d from  sbi_new@sbi_new_dblink;
+
+-- above ddl will take 3 to 4 min;
+
+now open newly created pluggable database and makes sure cloning is perfect.
+
+go to source database and conver database from readonly to read write;
